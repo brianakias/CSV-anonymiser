@@ -1,6 +1,5 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.Configuration.Attributes;
 using System.Globalization;
 using System.Text;
 
@@ -10,16 +9,15 @@ namespace CSV_anonymiser.Classes
     {
         public ProcessCustomerInfoCSVFile()
         {
-            // put all the logic here and ideally just by instantiating this class, it runs the whole thing
             string inputFilePath = CommunicateWithUser.RequestFilePath("input");
-            List<CustomerInfo> records = GetCSVRecords(inputFilePath);
+            List<CustomerInfo> records = GetRecords(inputFilePath);
             AnonymiseSensitiveInfo(records);
-            WriteCSVRecords(records);
-            // nneed to comme up with a way to return the records so that they cacn be used for working on the address ccsv file
+            WriteRecords(records);
+            // nneed to comme up with a way to return the records so that they can be used for working on the address ccsv file
         }
-        private List<CustomerInfo> GetCSVRecords(string inputFilePath)
+        private List<CustomerInfo> GetRecords(string inputFilePath)
         {
-            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = true,
                 TrimOptions = TrimOptions.Trim,
@@ -27,9 +25,11 @@ namespace CSV_anonymiser.Classes
                 Delimiter = ",",
             };
 
-            using (var fileStream = File.Open(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var reader = new StreamReader(fileStream, Encoding.UTF8))
-            using (var csv = new CsvReader(reader, configuration))
+            //using (var fileStream = File.Open(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            //using (var reader = new StreamReader(fileStream, Encoding.UTF8))
+            //using (var csv = new CsvReader(reader, config))
+            using (var reader = new StreamReader(inputFilePath))
+            using (var csv = new CsvReader(reader, config))
             {
                 csv.Context.RegisterClassMap<CustomerInfoMap>();
                 var records = csv.GetRecords<CustomerInfo>().ToList();
@@ -41,11 +41,11 @@ namespace CSV_anonymiser.Classes
         {
             foreach (CustomerInfo customerInfo in records)
             {
-                customerInfo.ReplaceSensitiveInfoWithFakeData();
+                customerInfo.Anonymise();
             }
         }
 
-        private void WriteCSVRecords(List<CustomerInfo> records)
+        private void WriteRecords(List<CustomerInfo> records)
         {
             var csvPath = Path.Combine(Environment.CurrentDirectory, $"customers_sample-{DateTime.Now.ToFileTime()}.csv");
             using (var writer = new StreamWriter(csvPath))

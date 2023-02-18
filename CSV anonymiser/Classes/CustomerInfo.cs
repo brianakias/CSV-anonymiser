@@ -39,7 +39,10 @@ namespace CSV_anonymiser.Classes
         public string taxvat { get; set; }
         public string password_hash { get; set; }
 
-        public void ReplaceSensitiveInfoWithFakeData()
+        /// <summary>
+        /// Replaces values from gdpr related properties. Replaces with values relevant to what the properties define.
+        /// </summary>
+        public void Anonymise()
         {
             firstname = Name.First();
             middlename = middlename == string.Empty ? string.Empty : Name.Middle();
@@ -48,9 +51,5 @@ namespace CSV_anonymiser.Classes
             dob = dob == string.Empty ? string.Empty : Identification.DateOfBirth().ToShortDateString();
             gender = gender == string.Empty ? string.Empty : MyUtilities.GenerateRandomGender();
         }
-
-
-
-
     }
 }
