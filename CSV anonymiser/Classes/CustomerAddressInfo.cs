@@ -38,7 +38,7 @@ namespace CSV_anonymiser.Classes
             street = Address.StreetAddress();
             city = Address.City();
             state = Address.UkCounty();
-            postalCode = Address.UkPostCode();
+            postalCode = Address.UkPostCode().ToUpper();
             telephone = Phone.Number();
         }
     }

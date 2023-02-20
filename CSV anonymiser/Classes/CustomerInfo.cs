@@ -39,9 +39,6 @@ namespace CSV_anonymiser.Classes
         public string taxvat { get; set; }
         public string password_hash { get; set; }
 
-        /// <summary>
-        /// Replaces values from gdpr related properties. Replaces with values relevant to what the properties represent.
-        /// </summary>
         public void Anonymise()
         {
             firstname = Name.First();

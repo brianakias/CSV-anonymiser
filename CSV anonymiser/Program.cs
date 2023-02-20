@@ -24,11 +24,6 @@ namespace CSV_anonymiser
 
             Dictionary<string, CustomerInfo> customerRecords = processor.ProcessCustomersFile(customersFilePath);
             processor.ProcessAddressesFile(addressesFilePath, customerRecords);
-
-
         }
-
     }
-
-
 }

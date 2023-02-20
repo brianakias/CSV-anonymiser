@@ -2,11 +2,6 @@
 {
     public static class CommunicateWithUser
     {
-        /// <summary>
-        /// Prompts the user to provide the path to an input or output file.
-        /// </summary>
-        /// <param name="inputOrOutput">The type of file to prompt for ("input" or "output").</param>
-        /// <returns>The file path provided by the user.</returns>
         public static string RequestFilePath()
         {
             string filePath;
