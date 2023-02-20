@@ -8,6 +8,7 @@ From the customers file I am anonymising the below:
 - lastname
 - dob
 - gender
+
 From the addresses file I am anonymising the below:
 
 - firstname (from custumer, if exists)
