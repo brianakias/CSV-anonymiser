@@ -35,6 +35,13 @@ namespace CSV_anonymiser.Classes
                 email = customersEmail;
             }
 
+            else
+            {
+                firstname = Name.First();
+                lastname = Name.Last();
+                email = $"{firstname.ToLower()}.{lastname.ToLower()}@escentual.com";
+            }
+
             street = Address.StreetAddress();
             city = Address.City();
             state = Address.UkCounty();
