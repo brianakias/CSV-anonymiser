@@ -1,4 +1,7 @@
 ﻿using CSV_anonymiser.Classes;
+using CsvHelper.Configuration;
+using System.Globalization;
+using System.Text;
 
 namespace CSV_anonymiser
 {
@@ -6,28 +9,23 @@ namespace CSV_anonymiser
     {
         static void Main(string[] args)
         {
-            //Console.WriteLine("-- Customers file --");
-            //string customersFilePath_Input = CommunicateWithUser.RequestFilePath("input");
-            //string customersFilePath_Output = CommunicateWithUser.RequestFilePath("output");
-            //Console.WriteLine("-- Addresses file --");
-            //string addressesFilePath_Input = CommunicateWithUser.RequestFilePath("input");
-            //string addressesFilePath_Output = CommunicateWithUser.RequestFilePath("output");
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                TrimOptions = TrimOptions.Trim,
+                Encoding = Encoding.UTF8,
+                Delimiter = ",",
+            };
+            FileProcessor processor = new FileProcessor(config);
 
-            //ProcessCustomerInfoCSVFile customerInfoAnonymiser = new ProcessCustomerInfoCSVFile();
-            //List<CustomerInfo> customerInfoRecords = customerInfoAnonymiser.GetCSVRecords(customersFilePath_Input);
-            //foreach (CustomerInfo customerInfo in customerInfoRecords)
-            //{
-            //    customerInfo.ReplaceSensitiveInfoWithFakeData();
-            //}5
+            List<string> filePaths = processor.RequestInputFilePaths();
+            string customersFilePath = filePaths[0];
+            string addressesFilePath = filePaths[1];
 
-            //Console.WriteLine(Environment.CurrentDirectory);
-            ProcessCustomerInfoCSVFile processor = new ProcessCustomerInfoCSVFile();
+            Dictionary<string, CustomerInfo> customerRecords = processor.ProcessCustomersFile(customersFilePath);
+            processor.ProcessAddressesFile(addressesFilePath, customerRecords);
 
 
-            // https://youtu.be/fRaSeLYYrcQ?t=145 
-            // var csvPath = Path.Combine(Environment.CurrentDirectory, $"rockets-{DateTime.Now.ToFi1eTime()}.csv");
-            // using the above you can create a file
-            // test using this instead of asking for the user to pass the csv file.
         }
 
     }

@@ -40,16 +40,16 @@ namespace CSV_anonymiser.Classes
         public string password_hash { get; set; }
 
         /// <summary>
-        /// Replaces values from gdpr related properties. Replaces with values relevant to what the properties define.
+        /// Replaces values from gdpr related properties. Replaces with values relevant to what the properties represent.
         /// </summary>
         public void Anonymise()
         {
             firstname = Name.First();
-            middlename = middlename == string.Empty ? string.Empty : Name.Middle();
+            middlename = Name.Middle();
             lastname = Name.Last();
             email = $"{firstname.ToLower()}.{lastname.ToLower()}@escentual.com";
-            dob = dob == string.Empty ? string.Empty : Identification.DateOfBirth().ToShortDateString();
-            gender = gender == string.Empty ? string.Empty : MyUtilities.GenerateRandomGender();
+            dob = Identification.DateOfBirth().ToShortDateString();
+            gender = MyUtilities.GenerateRandomGender();
         }
     }
 }

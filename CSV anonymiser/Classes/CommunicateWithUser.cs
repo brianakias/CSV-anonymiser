@@ -7,42 +7,24 @@
         /// </summary>
         /// <param name="inputOrOutput">The type of file to prompt for ("input" or "output").</param>
         /// <returns>The file path provided by the user.</returns>
-        public static string RequestFilePath(string inputOrOutput)
+        public static string RequestFilePath()
         {
-            string filePath = "";
+            string filePath;
 
-            if (inputOrOutput == "input")
+            do
             {
-                do
+                Console.WriteLine("Provide the path of the file to read from: ");
+                filePath = Console.ReadLine();
+
+                if (!File.Exists(filePath))
                 {
-                    Console.WriteLine("Provide the path of the file to read from: ");
-                    filePath = Console.ReadLine();
+                    Console.WriteLine($"Could not locate file with path `{filePath}`. Please retry.");
+                }
 
-                    if (!File.Exists(filePath))
-                    {
-                        Console.WriteLine($"Could not locate file with path `{filePath}`. Please retry.");
-                    }
+            } while (!File.Exists(filePath));
 
-                } while (!File.Exists(filePath));
-
-                Console.WriteLine("Thanks, file exists.");
-            }
-
-            else if (inputOrOutput == "output")
-            {
-                do
-                {
-                    Console.WriteLine("Provide the path of the file to write to: ");
-                    filePath = Console.ReadLine();
-
-                    if (!File.Exists(filePath))
-                    {
-                        Console.WriteLine($"Could not locate file with path `{filePath}`. Please retry.");
-                    }
-                } while (!File.Exists(filePath));
-
-                Console.WriteLine("Thanks, file exists.");
-            }
+            Console.WriteLine("\nThanks, file exists.");
+            Console.WriteLine(new string('*', Console.WindowWidth - 2));
 
             return filePath;
         }

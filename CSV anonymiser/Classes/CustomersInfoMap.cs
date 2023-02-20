@@ -4,9 +4,9 @@ using System.Globalization;
 
 namespace CSV_anonymiser.Classes
 {
-    public class CustomerInfoMap : ClassMap<CustomerInfo>
+    public class CustomersInfoMap : ClassMap<CustomerInfo>
     {
-        public CustomerInfoMap()
+        public CustomersInfoMap()
         {
             AutoMap(CultureInfo.InvariantCulture);
         }
