@@ -41,7 +41,9 @@ namespace CsvAnonymiser.Classes
             using (var csv = new CsvReader(reader, Config))
             {
                 csv.Context.RegisterClassMap<CustomersInfoMap>();
-                Dictionary<string, CustomerInfo> records = csv.GetRecords<CustomerInfo>().ToDictionary(customer => customer.entity_id, customer => customer);
+                Dictionary<string, CustomerInfo> records = csv.GetRecords<CustomerInfo>()
+                    .DistinctBy(customer => customer.entity_id)
+                    .ToDictionary(customer => customer.entity_id, customer => customer);
                 return records;
             }
         }
@@ -89,7 +91,9 @@ namespace CsvAnonymiser.Classes
             using (var csv = new CsvReader(reader, Config))
             {
                 csv.Context.RegisterClassMap<CustomerAddressInfoMap>();
-                var records = csv.GetRecords<CustomerAddressInfo>().ToDictionary(address => address.addressId, address => address);
+                var records = csv.GetRecords<CustomerAddressInfo>()
+                    .DistinctBy(address => address.addressId)
+                    .ToDictionary(address => address.addressId, address => address);
                 return records;
             }
         }
