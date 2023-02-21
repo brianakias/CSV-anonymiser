@@ -1,5 +1,5 @@
 ﻿
-namespace CSV_anonymiser.Classes
+namespace CsvAnonymiser.Classes
 {
     public static class MyUtilities
     {

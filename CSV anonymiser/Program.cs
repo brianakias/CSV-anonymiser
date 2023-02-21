@@ -1,9 +1,9 @@
-﻿using CSV_anonymiser.Classes;
+﻿using CsvAnonymiser.Classes;
 using CsvHelper.Configuration;
 using System.Globalization;
 using System.Text;
 
-namespace CSV_anonymiser
+namespace CsvAnonymiser
 {
     internal class Program
     {

@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
-namespace CSV_anonymiser.Classes
+namespace CsvAnonymiser.Classes
 {
     public class FileProcessor
     {

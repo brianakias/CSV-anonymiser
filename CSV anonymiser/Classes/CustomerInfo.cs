@@ -1,7 +1,7 @@
 ﻿
 using Faker;
 
-namespace CSV_anonymiser.Classes
+namespace CsvAnonymiser.Classes
 {
     public class CustomerInfo
     {

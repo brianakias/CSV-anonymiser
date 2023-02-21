@@ -2,7 +2,7 @@
 using CsvHelper.Configuration;
 using System.Globalization;
 
-namespace CSV_anonymiser.Classes
+namespace CsvAnonymiser.Classes
 {
     public class CustomerAddressInfoMap : ClassMap<CustomerAddressInfo>
     {
