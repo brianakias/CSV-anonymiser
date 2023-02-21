@@ -31,7 +31,8 @@ namespace CsvAnonymiser.Classes
         {
             Dictionary<string, CustomerInfo> records = GetCustomersRecords(customersFilePath);
             AnonymiseSensitiveInfo_CustomersFile(records);
-            WriteRecords(records);
+            //WriteRecords(records);
+            WriteRecords(customersFilePath, records);
             return records;
         }
 
@@ -56,9 +57,9 @@ namespace CsvAnonymiser.Classes
             }
         }
 
-        private Dictionary<string, CustomerInfo> WriteRecords(Dictionary<string, CustomerInfo> customerRecords)
+        private Dictionary<string, CustomerInfo> WriteRecords(string customersFilePath, Dictionary<string, CustomerInfo> customerRecords)
         {
-            var csvPath = Path.Combine(Environment.CurrentDirectory, $"customers_sample-{DateTime.Now.ToFileTime()}.csv");
+            var csvPath = Path.Combine(Path.GetDirectoryName(customersFilePath), $"{Path.GetFileNameWithoutExtension(customersFilePath)}-{DateTime.Now.ToFileTime()}.csv");
             using (var writer = new StreamWriter(csvPath))
             {
                 using (var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture))
@@ -82,7 +83,8 @@ namespace CsvAnonymiser.Classes
         {
             Dictionary<string, CustomerAddressInfo> addressRecords = GetAddressRecords(addressesFilePath);
             AnonymiseSensitiveInfo_AddressesFile(addressRecords, customerRecords);
-            WriteRecords(addressRecords);
+            //WriteRecords(addressRecords);
+            WriteRecords(addressesFilePath, addressRecords);
         }
 
         private Dictionary<string, CustomerAddressInfo> GetAddressRecords(string addressesFilePath)
@@ -119,9 +121,9 @@ namespace CsvAnonymiser.Classes
             }
         }
 
-        private void WriteRecords(Dictionary<string, CustomerAddressInfo> customerAddressRecords)
+        private void WriteRecords(string addressesFilePath, Dictionary<string, CustomerAddressInfo> customerAddressRecords)
         {
-            var csvPath = Path.Combine(Environment.CurrentDirectory, $"customer_addresses_sample-{DateTime.Now.ToFileTime()}.csv");
+            var csvPath = Path.Combine(Path.GetDirectoryName(addressesFilePath), $"{Path.GetFileNameWithoutExtension(addressesFilePath)}-{DateTime.Now.ToFileTime()}.csv");
             using (var writer = new StreamWriter(csvPath))
             {
                 using (var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture))
