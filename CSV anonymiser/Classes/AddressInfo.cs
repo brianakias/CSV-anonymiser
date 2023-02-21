@@ -3,7 +3,7 @@ using Faker;
 
 namespace CsvAnonymiser.Classes
 {
-    public class CustomerAddressInfo
+    public class AddressInfo
     {
         public string email { get; set; }
         public string customerId { get; set; }

@@ -12,102 +12,116 @@ namespace CsvAnonymiser.Classes
     {
         private CsvConfiguration Config { get; set; }
 
+        private string CustomersInputFilePath { get; set; }
+        private string CustomersOutputFilePath { get; set; }
+        private Dictionary<string, CustomerInfo> CustomersRecords { get; set; }
+
+        private string AddressesInputFilePath { get; set; }
+        private string AddressesOutputFilePath { get; set; }
+        private Dictionary<string, AddressInfo> AddressesRecords { get; set; }
+
         public FileProcessor(CsvConfiguration config)
         {
             Config = config;
         }
 
-        public List<string> RequestInputFilePaths()
+        public void RequestInputFilePaths()
         {
             Console.WriteLine("-- Customers file path --");
-            string customersFilePath = CommunicateWithUser.RequestFilePath();
+            CustomersInputFilePath = CommunicateWithUser.RequestFilePath();
+
             Console.WriteLine("-- Addresses file path --");
-            string addressesFilePath = CommunicateWithUser.RequestFilePath();
-            List<string> filePaths = new List<string>() { customersFilePath, addressesFilePath };
-            return filePaths;
+            AddressesInputFilePath = CommunicateWithUser.RequestFilePath();
         }
 
-        public Dictionary<string, CustomerInfo> ProcessCustomersFile(string customersFilePath)
+        public void ProvideOutputFileNames()
         {
-            Dictionary<string, CustomerInfo> records = GetCustomersRecords(customersFilePath);
-            AnonymiseSensitiveInfo_CustomersFile(records);
-            //WriteRecords(records);
-            WriteRecords(customersFilePath, records);
-            return records;
+            Console.WriteLine("-- Customers file name --");
+            CommunicateWithUser.ProvideOutputFileName(Path.GetFileName(CustomersOutputFilePath));
+
+            Console.WriteLine("-- Addresses file name --");
+            CommunicateWithUser.ProvideOutputFileName(Path.GetFileName(AddressesOutputFilePath));
         }
 
-        private Dictionary<string, CustomerInfo> GetCustomersRecords(string customersFilePath)
+        public void ProcessCustomersFile()
         {
-            using (var reader = new StreamReader(customersFilePath))
+            CreateCustomersRecords();
+            AnonymiseSensitiveInfo_Customers();
+            CreateOutputFilepath_Customers();
+            WriteCustomersRecords();
+        }
+
+        private void CreateCustomersRecords()
+        {
+            using (var reader = new StreamReader(CustomersInputFilePath))
             using (var csv = new CsvReader(reader, Config))
             {
                 csv.Context.RegisterClassMap<CustomersInfoMap>();
-                Dictionary<string, CustomerInfo> records = csv.GetRecords<CustomerInfo>()
+
+                CustomersRecords = csv.GetRecords<CustomerInfo>()
                     .DistinctBy(customer => customer.entity_id)
                     .ToDictionary(customer => customer.entity_id, customer => customer);
-                return records;
             }
         }
 
-        private void AnonymiseSensitiveInfo_CustomersFile(Dictionary<string, CustomerInfo> customerRecords)
+        private void AnonymiseSensitiveInfo_Customers()
         {
-            foreach (KeyValuePair<string, CustomerInfo> pair in customerRecords)
+            foreach (KeyValuePair<string, CustomerInfo> pair in CustomersRecords)
             {
                 pair.Value.Anonymise();
             }
         }
 
-        private Dictionary<string, CustomerInfo> WriteRecords(string customersFilePath, Dictionary<string, CustomerInfo> customerRecords)
+        private void CreateOutputFilepath_Customers()
         {
-            var csvPath = Path.Combine(Path.GetDirectoryName(customersFilePath), $"{Path.GetFileNameWithoutExtension(customersFilePath)}-{DateTime.Now.ToFileTime()}.csv");
-            using (var writer = new StreamWriter(csvPath))
+            CustomersOutputFilePath = Path.Combine(Path.GetDirectoryName(CustomersInputFilePath), $"{Path.GetFileNameWithoutExtension(CustomersInputFilePath)}-{DateTime.Now.ToFileTime()}.csv");
+        }
+
+        private void WriteCustomersRecords()
+        {
+            using (var writer = new StreamWriter(CustomersOutputFilePath))
             {
                 using (var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture))
                 {
                     csvWriter.WriteHeader<CustomerInfo>();
                     csvWriter.NextRecord();
 
-                    foreach (CustomerInfo customer in customerRecords.Values)
+                    foreach (CustomerInfo customer in CustomersRecords.Values)
                     {
                         csvWriter.WriteRecord(customer);
                         csvWriter.NextRecord();
                     }
                 }
             }
-
-            return customerRecords;
         }
 
-
-        public void ProcessAddressesFile(string addressesFilePath, Dictionary<string, CustomerInfo> customerRecords)
+        public void ProcessAddressesFile()
         {
-            Dictionary<string, CustomerAddressInfo> addressRecords = GetAddressRecords(addressesFilePath);
-            AnonymiseSensitiveInfo_AddressesFile(addressRecords, customerRecords);
-            //WriteRecords(addressRecords);
-            WriteRecords(addressesFilePath, addressRecords);
+            CreateAddressesRecords();
+            AnonymiseSensitiveInfo_Addresses();
+            CreateOutputFilepath_Addresses();
+            WriteAddressesRecords();
         }
 
-        private Dictionary<string, CustomerAddressInfo> GetAddressRecords(string addressesFilePath)
+        private void CreateAddressesRecords()
         {
-            using (var reader = new StreamReader(addressesFilePath))
+            using (var reader = new StreamReader(AddressesInputFilePath))
             using (var csv = new CsvReader(reader, Config))
             {
-                csv.Context.RegisterClassMap<CustomerAddressInfoMap>();
-                var records = csv.GetRecords<CustomerAddressInfo>()
+                csv.Context.RegisterClassMap<AddressesInfoMap>();
+                AddressesRecords = csv.GetRecords<AddressInfo>()
                     .DistinctBy(address => address.addressId)
                     .ToDictionary(address => address.addressId, address => address);
-                return records;
             }
         }
 
-        private void AnonymiseSensitiveInfo_AddressesFile(Dictionary<string, CustomerAddressInfo> customerAddressRecords, Dictionary<string, CustomerInfo> customerRecords)
+        private void AnonymiseSensitiveInfo_Addresses()
         {
-
-            foreach (KeyValuePair<string, CustomerAddressInfo> pair in customerAddressRecords)
+            foreach (KeyValuePair<string, AddressInfo> pair in AddressesRecords)
             {
                 string currentCustomerId = pair.Value.customerId;
                 CustomerInfo currentCustomer;
-                bool customerExists = customerRecords.TryGetValue(currentCustomerId, out currentCustomer);
+                bool customerExists = CustomersRecords.TryGetValue(currentCustomerId, out currentCustomer);
 
                 if (customerExists)
                 {
@@ -121,19 +135,23 @@ namespace CsvAnonymiser.Classes
             }
         }
 
-        private void WriteRecords(string addressesFilePath, Dictionary<string, CustomerAddressInfo> customerAddressRecords)
+        private void CreateOutputFilepath_Addresses()
         {
-            var csvPath = Path.Combine(Path.GetDirectoryName(addressesFilePath), $"{Path.GetFileNameWithoutExtension(addressesFilePath)}-{DateTime.Now.ToFileTime()}.csv");
-            using (var writer = new StreamWriter(csvPath))
+            AddressesOutputFilePath = Path.Combine(Path.GetDirectoryName(AddressesInputFilePath), $"{Path.GetFileNameWithoutExtension(AddressesInputFilePath)}-{DateTime.Now.ToFileTime()}.csv");
+        }
+
+        private void WriteAddressesRecords()
+        {
+            using (var writer = new StreamWriter(AddressesOutputFilePath))
             {
                 using (var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture))
                 {
-                    csvWriter.WriteHeader<CustomerAddressInfo>();
+                    csvWriter.WriteHeader<AddressInfo>();
                     csvWriter.NextRecord();
 
-                    foreach (CustomerAddressInfo customer in customerAddressRecords.Values)
+                    foreach (AddressInfo address in AddressesRecords.Values)
                     {
-                        csvWriter.WriteRecord(customer);
+                        csvWriter.WriteRecord(address);
                         csvWriter.NextRecord();
                     }
                 }

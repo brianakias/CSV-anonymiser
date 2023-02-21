@@ -18,12 +18,9 @@ namespace CsvAnonymiser
             };
             FileProcessor processor = new FileProcessor(config);
 
-            List<string> filePaths = processor.RequestInputFilePaths();
-            string customersFilePath = filePaths[0];
-            string addressesFilePath = filePaths[1];
-
-            Dictionary<string, CustomerInfo> customerRecords = processor.ProcessCustomersFile(customersFilePath);
-            processor.ProcessAddressesFile(addressesFilePath, customerRecords);
+            processor.RequestInputFilePaths();
+            processor.ProcessCustomersFile();
+            processor.ProcessAddressesFile();
         }
     }
 }
