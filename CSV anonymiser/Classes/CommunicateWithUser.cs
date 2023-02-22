@@ -23,5 +23,11 @@
 
             return filePath;
         }
+
+        public static void ProvideOutputFileName(string fileName)
+        {
+            Console.WriteLine(fileName);
+            Console.WriteLine(new string('*', Console.WindowWidth - 2));
+        }
     }
 }
