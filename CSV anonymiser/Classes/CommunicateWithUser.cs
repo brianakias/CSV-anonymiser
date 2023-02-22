@@ -1,5 +1,4 @@
-﻿using CSV_anonymiser.Enums;
-using System;
+﻿using System;
 
 namespace CsvAnonymiser.Classes
 {
