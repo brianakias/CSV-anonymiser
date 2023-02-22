@@ -86,8 +86,11 @@ namespace CsvAnonymiser.Classes
                     csvWriter.WriteHeader<CustomerInfo>();
                     csvWriter.NextRecord();
 
-                    foreach (CustomerInfo customer in CustomersRecords.Values)
+                    for (int i = 0; i < CustomersRecords.Count; i++)
                     {
+                        CommunicateWithUser.ShowProgress(CSV_anonymiser.Enums.OperationType.Writing, i, CustomersRecords, null);
+                        KeyValuePair<string, CustomerInfo> kvp = CustomersRecords.ElementAt(i);
+                        CustomerInfo customer = kvp.Value;
                         csvWriter.WriteRecord(customer);
                         csvWriter.NextRecord();
                     }
@@ -149,8 +152,11 @@ namespace CsvAnonymiser.Classes
                     csvWriter.WriteHeader<AddressInfo>();
                     csvWriter.NextRecord();
 
-                    foreach (AddressInfo address in AddressesRecords.Values)
+                    for (int i = 0; i < AddressesRecords.Count; i++)
                     {
+                        CommunicateWithUser.ShowProgress(CSV_anonymiser.Enums.OperationType.Writing, i, null, AddressesRecords);
+                        KeyValuePair<string, AddressInfo> kvp = AddressesRecords.ElementAt(i);
+                        AddressInfo address = kvp.Value;
                         csvWriter.WriteRecord(address);
                         csvWriter.NextRecord();
                     }
