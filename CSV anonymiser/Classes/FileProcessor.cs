@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection.Metadata.Ecma335;
@@ -13,12 +14,14 @@ namespace CsvAnonymiser.Classes
         private CsvConfiguration Config { get; set; }
 
         private string CustomersInputFilePath { get; set; }
+        private int CustomersRowCountInputFile { get; set; } = 0;
         private string CustomersOutputFilePath { get; set; }
-        private Dictionary<string, CustomerInfo> CustomersRecords { get; set; }
+        private Dictionary<string, CustomerInfo> CustomersRecords { get; set; } = new Dictionary<string, CustomerInfo>();
 
         private string AddressesInputFilePath { get; set; }
+        private int AddressesRowCountInputFile { get; set; } = 0;
         private string AddressesOutputFilePath { get; set; }
-        private Dictionary<string, AddressInfo> AddressesRecords { get; set; }
+        private Dictionary<string, AddressInfo> AddressesRecords { get; set; } = new Dictionary<string, AddressInfo>();
 
         public FileProcessor(CsvConfiguration config)
         {
@@ -45,10 +48,23 @@ namespace CsvAnonymiser.Classes
 
         public void ProcessCustomersFile()
         {
+            CountCustomersRowsInputFile();
             CreateCustomersRecords();
             AnonymiseSensitiveInfo_Customers();
             CreateOutputFilepath_Customers();
             WriteCustomersRecords();
+        }
+
+        private void CountCustomersRowsInputFile()
+        {
+            using (var reader = new StreamReader(CustomersInputFilePath))
+            using (var csv = new CsvReader(reader, Config))
+            {
+                while (csv.Read())
+                {
+                    CustomersRowCountInputFile++;
+                }
+            }
         }
 
         private void CreateCustomersRecords()
@@ -58,9 +74,22 @@ namespace CsvAnonymiser.Classes
             {
                 csv.Context.RegisterClassMap<CustomersInfoMap>();
 
-                CustomersRecords = csv.GetRecords<CustomerInfo>()
-                    .DistinctBy(customer => customer.entity_id)
-                    .ToDictionary(customer => customer.entity_id, customer => customer);
+                while (csv.Read())
+                {
+                    CustomerInfo customer = csv.GetRecord<CustomerInfo>();
+
+                    bool customerKeyAlreadyExists = CustomersRecords.ContainsKey(customer.entity_id);
+
+                    if (!customerKeyAlreadyExists)
+                    {
+                        CustomersRecords.Add(customer.entity_id, customer);
+                        int currentRow = csv.Context.Parser.RawRow - 1;
+                        CommunicateWithUser.ShowReadingProgress(currentRow, CustomersRowCountInputFile, CustomersRecords, null);
+                        //Console.WriteLine($"Reading customers record {currentRow} of {CustomersRowCountInputFile}");
+                    }
+                }
+
+                CommunicateWithUser.ShowLineSeparator();
             }
         }
 
@@ -88,22 +117,37 @@ namespace CsvAnonymiser.Classes
 
                     for (int i = 0; i < CustomersRecords.Count; i++)
                     {
-                        CommunicateWithUser.ShowProgress(CSV_anonymiser.Enums.OperationType.Writing, i, CustomersRecords, null);
+                        CommunicateWithUser.ShowWritingProgress(i, CustomersRecords, null);
                         KeyValuePair<string, CustomerInfo> kvp = CustomersRecords.ElementAt(i);
                         CustomerInfo customer = kvp.Value;
                         csvWriter.WriteRecord(customer);
                         csvWriter.NextRecord();
                     }
+
+                    CommunicateWithUser.ShowLineSeparator();
                 }
             }
         }
 
         public void ProcessAddressesFile()
         {
+            CountAddressesRowsInputFile();
             CreateAddressesRecords();
             AnonymiseSensitiveInfo_Addresses();
             CreateOutputFilepath_Addresses();
             WriteAddressesRecords();
+        }
+
+        private void CountAddressesRowsInputFile()
+        {
+            using (var reader = new StreamReader(AddressesInputFilePath))
+            using (var csv = new CsvReader(reader, Config))
+            {
+                while (csv.Read())
+                {
+                    AddressesRowCountInputFile++;
+                }
+            }
         }
 
         private void CreateAddressesRecords()
@@ -112,9 +156,22 @@ namespace CsvAnonymiser.Classes
             using (var csv = new CsvReader(reader, Config))
             {
                 csv.Context.RegisterClassMap<AddressesInfoMap>();
-                AddressesRecords = csv.GetRecords<AddressInfo>()
-                    .DistinctBy(address => address.addressId)
-                    .ToDictionary(address => address.addressId, address => address);
+
+                while (csv.Read())
+                {
+                    AddressInfo address = csv.GetRecord<AddressInfo>();
+                    bool addressKeyAlreadyExists = AddressesRecords.ContainsKey(address.addressId);
+
+                    if (!addressKeyAlreadyExists)
+                    {
+                        AddressesRecords.Add(address.addressId, address);
+                        int currentRow = csv.Context.Parser.RawRow - 1;
+                        //Console.WriteLine($"Reading addresses record {currentRow} of {AddressesRowCountInputFile}");
+                        CommunicateWithUser.ShowReadingProgress(currentRow, AddressesRowCountInputFile, null, AddressesRecords);
+                    }
+                }
+
+                CommunicateWithUser.ShowLineSeparator();
             }
         }
 
@@ -154,12 +211,14 @@ namespace CsvAnonymiser.Classes
 
                     for (int i = 0; i < AddressesRecords.Count; i++)
                     {
-                        CommunicateWithUser.ShowProgress(CSV_anonymiser.Enums.OperationType.Writing, i, null, AddressesRecords);
+                        CommunicateWithUser.ShowWritingProgress(i, null, AddressesRecords);
                         KeyValuePair<string, AddressInfo> kvp = AddressesRecords.ElementAt(i);
                         AddressInfo address = kvp.Value;
                         csvWriter.WriteRecord(address);
                         csvWriter.NextRecord();
                     }
+
+                    CommunicateWithUser.ShowLineSeparator();
                 }
             }
         }
