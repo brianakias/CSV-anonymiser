@@ -15,6 +15,7 @@ namespace CsvAnonymiser
                 TrimOptions = TrimOptions.Trim,
                 Encoding = Encoding.UTF8,
                 Delimiter = ",",
+                BadDataFound = null,
             };
             FileProcessor processor = new FileProcessor(config);
 
