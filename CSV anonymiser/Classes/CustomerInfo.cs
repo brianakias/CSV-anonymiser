@@ -47,6 +47,7 @@ namespace CsvAnonymiser.Classes
             email = $"{firstname.ToLower()}.{lastname.ToLower()}@escentual.com";
             dob = Identification.DateOfBirth().ToShortDateString();
             gender = MyUtilities.GenerateRandomGender();
+            password_hash = MyUtilities.GenerateRandomPasswordHash(60);
         }
     }
 }

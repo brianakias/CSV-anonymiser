@@ -8,6 +8,7 @@ From the customers file I am anonymising the below:
 - lastname
 - dob
 - gender
+- password_hash
 
 From the addresses file I am anonymising the below:
 
