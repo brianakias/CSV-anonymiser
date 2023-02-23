@@ -39,7 +39,7 @@ namespace CsvAnonymiser.Classes
 
         public void ProvideOutputFileNames()
         {
-            Console.WriteLine("-- Customers filecreated with name --");
+            Console.WriteLine("-- Customers file created with name --");
             CommunicateWithUser.ProvideOutputFileName(Path.GetFileName(CustomersOutputFilePath));
 
             Console.WriteLine("-- Addresses file created with name --");
