@@ -13,6 +13,8 @@ namespace CsvAnonymiser.Classes
     {
         private CsvConfiguration Config { get; set; }
 
+        private string InputFilesDirectory { get; set; } = "C:\\Users\\miltiadis.zoumekas\\Desktop\\";
+
         private string CustomersInputFilePath { get; set; }
         private int CustomersRowCountInputFile { get; set; } = 0;
         private string CustomersOutputFilePath { get; set; }
@@ -28,13 +30,13 @@ namespace CsvAnonymiser.Classes
             Config = config;
         }
 
-        public void RequestInputFilePaths()
+        public void CreateInputFilePaths(string[] args)
         {
-            Console.WriteLine("-- Customers file path --");
-            CustomersInputFilePath = CommunicateWithUser.RequestFilePath();
+            string customersFileName = args[0];
+            string addressesFileName = args[1];
 
-            Console.WriteLine("-- Addresses file path --");
-            AddressesInputFilePath = CommunicateWithUser.RequestFilePath();
+            CustomersInputFilePath = Path.Combine(InputFilesDirectory, customersFileName);
+            AddressesInputFilePath = Path.Combine(InputFilesDirectory, addressesFileName);
         }
 
         public void ProvideOutputFileNames()
