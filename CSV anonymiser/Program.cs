@@ -22,6 +22,7 @@ namespace CsvAnonymiser
             processor.CreateInputFilePaths(args);
             processor.ProcessCustomersFile();
             processor.ProcessAddressesFile();
+            processor.ProcessSubscriptionsFile();
             processor.ProvideOutputFileNames();
         }
     }
