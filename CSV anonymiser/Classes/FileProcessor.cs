@@ -1,4 +1,5 @@
-﻿using CsvHelper;
+﻿using CSV_anonymiser.Classes;
+using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Expressions;
 using System;
@@ -25,6 +26,11 @@ namespace CsvAnonymiser.Classes
         private string AddressesOutputFilePath { get; set; }
         private Dictionary<string, AddressInfo> AddressesRecords { get; set; } = new Dictionary<string, AddressInfo>();
 
+        private string SubscriptionsInputFilePath { get; set; }
+        private int SubscriptionsRowCountInputFile { get; set; } = 0;
+        private string SubscriptionsOutputFilePath { get; set; }
+        private Dictionary<string, SubscriptionInfo> SubscriptionsRecords { get; set; } = new Dictionary<string, SubscriptionInfo>();
+
         public FileProcessor(CsvConfiguration config)
         {
             Config = config;
@@ -34,9 +40,11 @@ namespace CsvAnonymiser.Classes
         {
             string customersFileName = args[0];
             string addressesFileName = args[1];
+            string subscriptionsFileName = args[2];
 
             CustomersInputFilePath = Path.Combine(InputFilesDirectory, customersFileName);
             AddressesInputFilePath = Path.Combine(InputFilesDirectory, addressesFileName);
+            SubscriptionsInputFilePath = Path.Combine(InputFilesDirectory, subscriptionsFileName);
         }
 
         public void ProvideOutputFileNames()
@@ -46,6 +54,9 @@ namespace CsvAnonymiser.Classes
 
             Console.WriteLine("-- Addresses file created with name --");
             CommunicateWithUser.ProvideOutputFileName(Path.GetFileName(AddressesOutputFilePath));
+
+            Console.WriteLine("-- Subscriptions file created with name --");
+            CommunicateWithUser.ProvideOutputFileName(Path.GetFileName(SubscriptionsOutputFilePath));
         }
 
         public void ProcessCustomersFile()
@@ -86,7 +97,7 @@ namespace CsvAnonymiser.Classes
                     {
                         CustomersRecords.Add(customer.entity_id, customer);
                         int currentRow = csv.Context.Parser.RawRow - 1;
-                        CommunicateWithUser.ShowReadingProgress(currentRow, CustomersRowCountInputFile, CustomersRecords, null);
+                        CommunicateWithUser.ShowReadingProgress(currentRow, CustomersRowCountInputFile, CustomersRecords, null, null);
                         //Console.WriteLine($"Reading customers record {currentRow} of {CustomersRowCountInputFile}");
                     }
                 }
@@ -105,7 +116,7 @@ namespace CsvAnonymiser.Classes
 
         private void CreateOutputFilepath_Customers()
         {
-            CustomersOutputFilePath = Path.Combine(Path.GetDirectoryName(CustomersInputFilePath), $"{Path.GetFileNameWithoutExtension(CustomersInputFilePath)}-{DateTime.Now.ToFileTime()}.csv");
+            CustomersOutputFilePath = Path.Combine(InputFilesDirectory, $"{Path.GetFileNameWithoutExtension(CustomersInputFilePath)}-{DateTime.Now.ToFileTime()}.csv");
         }
 
         private void WriteCustomersRecords()
@@ -119,7 +130,7 @@ namespace CsvAnonymiser.Classes
 
                     for (int i = 0; i < CustomersRecords.Count; i++)
                     {
-                        CommunicateWithUser.ShowWritingProgress(i, CustomersRecords, null);
+                        CommunicateWithUser.ShowWritingProgress(i, CustomersRecords, null, null);
                         KeyValuePair<string, CustomerInfo> kvp = CustomersRecords.ElementAt(i);
                         CustomerInfo customer = kvp.Value;
                         csvWriter.WriteRecord(customer);
@@ -168,8 +179,7 @@ namespace CsvAnonymiser.Classes
                     {
                         AddressesRecords.Add(address.addressId, address);
                         int currentRow = csv.Context.Parser.RawRow - 1;
-                        //Console.WriteLine($"Reading addresses record {currentRow} of {AddressesRowCountInputFile}");
-                        CommunicateWithUser.ShowReadingProgress(currentRow, AddressesRowCountInputFile, null, AddressesRecords);
+                        CommunicateWithUser.ShowReadingProgress(currentRow, AddressesRowCountInputFile, null, AddressesRecords, null);
                     }
                 }
 
@@ -199,7 +209,7 @@ namespace CsvAnonymiser.Classes
 
         private void CreateOutputFilepath_Addresses()
         {
-            AddressesOutputFilePath = Path.Combine(Path.GetDirectoryName(AddressesInputFilePath), $"{Path.GetFileNameWithoutExtension(AddressesInputFilePath)}-{DateTime.Now.ToFileTime()}.csv");
+            AddressesOutputFilePath = Path.Combine(InputFilesDirectory, $"{Path.GetFileNameWithoutExtension(AddressesInputFilePath)}-{DateTime.Now.ToFileTime()}.csv");
         }
 
         private void WriteAddressesRecords()
@@ -213,7 +223,7 @@ namespace CsvAnonymiser.Classes
 
                     for (int i = 0; i < AddressesRecords.Count; i++)
                     {
-                        CommunicateWithUser.ShowWritingProgress(i, null, AddressesRecords);
+                        CommunicateWithUser.ShowWritingProgress(i, null, AddressesRecords, null);
                         KeyValuePair<string, AddressInfo> kvp = AddressesRecords.ElementAt(i);
                         AddressInfo address = kvp.Value;
                         csvWriter.WriteRecord(address);
@@ -224,5 +234,99 @@ namespace CsvAnonymiser.Classes
                 }
             }
         }
+
+        public void ProcessSubscriptionsFile()
+        {
+            CountSubscriptionsRowsInputFile();
+            CreateSubscriptionsRecords();
+            AnonymiseSensitiveInfo_Subscriptions();
+            CreateOutputFilepath_Subscriptions();
+            WriteSubscriptionsRecords();
+        }
+
+        private void CountSubscriptionsRowsInputFile()
+        {
+            using (var reader = new StreamReader(SubscriptionsInputFilePath))
+            using (var csv = new CsvReader(reader, Config))
+            {
+                while (csv.Read())
+                {
+                    SubscriptionsRowCountInputFile++;
+                }
+            }
+        }
+
+        private void CreateSubscriptionsRecords()
+        {
+            using (var reader = new StreamReader(SubscriptionsInputFilePath))
+            using (var csv = new CsvReader(reader, Config))
+            {
+                csv.Context.RegisterClassMap<SubscriptionInfoMap>();
+
+                while (csv.Read())
+                {
+                    SubscriptionInfo subscription = csv.GetRecord<SubscriptionInfo>();
+                    bool subscriptionKeyAlreadyExists = SubscriptionsRecords.ContainsKey(subscription.customer_id);
+
+                    if (!subscriptionKeyAlreadyExists)
+                    {
+                        SubscriptionsRecords.Add(subscription.customer_id, subscription);
+                        int currentRow = csv.Context.Parser.RawRow - 1;
+                        CommunicateWithUser.ShowReadingProgress(currentRow, SubscriptionsRowCountInputFile, null, null, SubscriptionsRecords);
+                    }
+                }
+
+                CommunicateWithUser.ShowLineSeparator();
+            }
+        }
+
+        private void AnonymiseSensitiveInfo_Subscriptions()
+        {
+            foreach (KeyValuePair<string, SubscriptionInfo> pair in SubscriptionsRecords)
+            {
+                string currentCustomerId = pair.Value.customer_id;
+                CustomerInfo currentCustomer;
+                bool customerExists = CustomersRecords.TryGetValue(currentCustomerId, out currentCustomer);
+
+                if (customerExists)
+                {
+                    pair.Value.Anonymise(currentCustomer);
+                }
+
+                else
+                {
+                    pair.Value.Anonymise();
+                }
+            }
+        }
+
+        private void CreateOutputFilepath_Subscriptions()
+        {
+            SubscriptionsOutputFilePath = Path.Combine(InputFilesDirectory, $"{Path.GetFileNameWithoutExtension(SubscriptionsInputFilePath)}-{DateTime.Now.ToFileTime()}.csv");
+        }
+
+        private void WriteSubscriptionsRecords()
+        {
+            using (var writer = new StreamWriter(SubscriptionsOutputFilePath))
+            {
+                using (var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csvWriter.WriteHeader<SubscriptionInfo>();
+                    csvWriter.NextRecord();
+
+                    for (int i = 0; i < SubscriptionsRecords.Count; i++)
+                    {
+                        CommunicateWithUser.ShowWritingProgress(i, null, null, SubscriptionsRecords);
+                        KeyValuePair<string, SubscriptionInfo> kvp = SubscriptionsRecords.ElementAt(i);
+                        SubscriptionInfo subscription = kvp.Value;
+                        csvWriter.WriteRecord(subscription);
+                        csvWriter.NextRecord();
+                    }
+
+                    CommunicateWithUser.ShowLineSeparator();
+                }
+            }
+        }
+
     }
 }
