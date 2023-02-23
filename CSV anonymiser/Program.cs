@@ -19,11 +19,10 @@ namespace CsvAnonymiser
             };
             FileProcessor processor = new FileProcessor(config);
 
-            processor.RequestInputFilePaths();
+            processor.CreateInputFilePaths(args);
             processor.ProcessCustomersFile();
             processor.ProcessAddressesFile();
             processor.ProvideOutputFileNames();
-
         }
     }
 }

@@ -1,6 +1,9 @@
 # CSV-anonymiser
 Anonymise customers and their addresses
 
+- To change the input file directory, modify the CsvAnonymiser.Classes.FileProcessor.InputFilesDirectory property.
+- To change the input file names, modify the launchSettings JSON File.
+
 From the customers file I am anonymising the below:
 
 - firstname

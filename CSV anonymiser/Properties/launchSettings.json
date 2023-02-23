@@ -1,7 +1,8 @@
 {
   "profiles": {
     "CSV anonymiser": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "customers_sample.csv\r\ncustomer_addresses_sample.csv"
     },
     "WSL": {
       "commandName": "WSL2",
