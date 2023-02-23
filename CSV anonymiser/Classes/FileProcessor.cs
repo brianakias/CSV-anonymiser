@@ -14,7 +14,7 @@ namespace CsvAnonymiser.Classes
     {
         private CsvConfiguration Config { get; set; }
 
-        private string InputFilesDirectory { get; set; } = "C:\\Users\\miltiadis.zoumekas\\Desktop\\";
+        private string InputFilesDirectory { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
 
         private string CustomersInputFilePath { get; set; }
         private int CustomersRowCountInputFile { get; set; } = 0;
