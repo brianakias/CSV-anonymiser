@@ -3,7 +3,7 @@ Anonymise customers and their addresses
 
 ## Usage
 Say that ```path``` is the path to the directory where the **CSV anonymiser.csproj** file is stored
-- Enter command ```dotnet run --project "path\\CSV anonymiser.csproj" customers_sample.csv customer_addresses_sample.csv customer_subscriptions_sample.csv```
+- Run cmd and type ```dotnet run --project "path\\CSV anonymiser.csproj" customers_sample.csv customer_addresses_sample.csv customer_subscriptions_sample.csv```
 
 ## Configuration guide
 - To change the input file directory, modify the ```CsvAnonymiser.Classes.FileProcessor.InputFilesDirectory``` property
